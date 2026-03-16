@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-powered web scraping and data extraction platform with automated validation and structured exports.">
+    <title>MindRift — AI Data Extraction Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <!-- Animated background -->
+    <div class="bg-grid"></div>
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                        <path d="M14 2L26 8V20L14 26L2 20V8L14 2Z" stroke="url(#grad1)" stroke-width="2" fill="none"/>
+                        <path d="M14 10L20 13V19L14 22L8 19V13L14 10Z" fill="url(#grad1)" opacity="0.6"/>
+                        <defs>
+                            <linearGradient id="grad1" x1="2" y1="2" x2="26" y2="26">
+                                <stop offset="0%" stop-color="#6C5CE7"/>
+                                <stop offset="100%" stop-color="#00D2FF"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <span class="logo-text">Mindrift</span>
+            </div>
+            <nav class="nav">
+                <a href="/docs" class="nav-link" target="_blank">API Docs</a>
+                <span class="health-badge" id="healthBadge">
+                    <span class="health-dot"></span>
+                    Checking...
+                </span>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1 class="hero-title">
+                AI Data<br>
+                <span class="gradient-text">Extraction Platform</span>
+            </h1>
+            <p class="hero-subtitle">
+                Extract structured data from any website with intelligent scraping,
+                automated validation, and AI-assisted analysis.
+            </p>
+        </section>
+
+        <!-- Scrape Input Card -->
+        <section class="card input-card" id="inputCard">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14.4A6.4 6.4 0 1110 3.6 6.4 6.4 0 0110 16.4z" fill="currentColor" opacity="0.3"/>
+                        <path d="M10 5v5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    New Extraction
+                </h2>
+            </div>
+            <div class="card-body">
+                <div class="input-group">
+                    <label for="urlInput" class="input-label">Target URL</label>
+                    <div class="url-input-wrap">
+                        <svg class="url-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path d="M7.5 10.5a4.5 4.5 0 006.36 0l1.5-1.5a4.5 4.5 0 00-6.36-6.36l-.86.86" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M10.5 7.5a4.5 4.5 0 00-6.36 0L2.64 9a4.5 4.5 0 006.36 6.36l.86-.86" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <input type="url" id="urlInput" placeholder="https://quotes.toscrape.com" autocomplete="url">
+                    </div>
+                </div>
+
+                <div class="options-row">
+                    <div class="option-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="dynamicToggle" class="toggle-input">
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-text">Dynamic (JS) Scraping</span>
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="llmToggle" class="toggle-input">
+                            <span class="toggle-switch"></span>
+                            <span class="toggle-text">AI Assistance</span>
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label for="maxPages" class="input-label-sm">Max Pages</label>
+                        <input type="number" id="maxPages" class="number-input" value="5" min="1" max="50">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" id="scrapeBtn" onclick="startScrape()">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M15.75 9a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M9 5.25v3.75l2.25 2.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <span>Start Extraction</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section class="card loading-card" id="loadingCard" style="display:none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3 class="loading-title">Extracting Data...</h3>
+                <p class="loading-text" id="loadingText">Connecting to target website</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error State -->
+        <section class="card error-card" id="errorCard" style="display:none;">
+            <div class="error-content">
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="#FF6B6B" stroke-width="2" opacity="0.3"/>
+                    <path d="M24 16v8M24 28v2" stroke="#FF6B6B" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>
+                <h3 class="error-title">Extraction Failed</h3>
+                <p class="error-text" id="errorText"></p>
+                <button class="btn btn-outline" onclick="resetUI()">Try Again</button>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section id="resultsSection" style="display:none;">
+            <!-- Stats Row -->
+            <div class="stats-row" id="statsRow">
+                <div class="stat-card">
+                    <span class="stat-value" id="statPages">0</span>
+                    <span class="stat-label">Pages Crawled</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="statItems">0</span>
+                    <span class="stat-label">Items Extracted</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="statMethod">—</span>
+                    <span class="stat-label">Method</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="statIssues">0</span>
+                    <span class="stat-label">Validation Issues</span>
+                </div>
+            </div>
+
+            <!-- AI Summary (if LLM was used) -->
+            <div class="card" id="aiSummaryCard" style="display:none;">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.3L10 14.5 5.1 17l.9-5.3-4-3.9L7.5 7z" fill="currentColor" opacity="0.3"/>
+                        </svg>
+                        AI Analysis
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p class="ai-summary-text" id="aiSummaryText"></p>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            <line x1="2" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.5"/>
+                            <line x1="7" y1="7" x2="7" y2="17" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                        Extracted Data
+                    </h2>
+                    <div class="card-actions">
+                        <button class="btn btn-sm btn-accent" id="exportCsvBtn" onclick="exportData('csv')">
+                            ⬇ CSV
+                        </button>
+                        <button class="btn btn-sm btn-accent" id="exportJsonBtn" onclick="exportData('json')">
+                            ⬇ JSON
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body table-wrap">
+                    <table class="data-table" id="dataTable">
+                        <thead id="tableHead"></thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                    <p class="table-note" id="tableNote"></p>
+                </div>
+            </div>
+
+            <!-- Validation Report -->
+            <div class="card" id="validationCard">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M10 18a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                            <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Validation Report
+                    </h2>
+                    <span class="validation-badge" id="validationBadge">—</span>
+                </div>
+                <div class="card-body">
+                    <div class="validation-stats" id="validationStats"></div>
+                    <div class="issues-list" id="issuesList"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Mindrift — AI Data Extraction Platform &middot; Built for the AI Pilot Vibe Code Specialist role</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
