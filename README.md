@@ -1,11 +1,8 @@
-# 🔮 Mindrift — AI Data Extraction Platform
+# Mindrift — AI Data Production & Validation Platform
 
-A production-ready web scraping and data extraction platform with AI-assisted automation, data validation, and structured exports. Built to demonstrate expertise in Python web scraping, data processing, and AI engineering.
+A production-grade platform for generating structured, validated datasets for AI training pipelines. Built with Python, FastAPI, and AI-assisted quality scoring — inspired by Toloka and Mindrift data production workflows.
 
-![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)
-![Railway](https://img.shields.io/badge/Railway-Deployable-0B0D0E?style=flat-square&logo=railway&logoColor=white)
+> **Live Demo:** [Deployed on Railway](https://genuine-elegance-production-b502.up.railway.app)
 
 ---
 
@@ -13,140 +10,127 @@ A production-ready web scraping and data extraction platform with AI-assisted au
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                      USER / BROWSER                     │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                  Frontend Dashboard                     │
-│         HTML + CSS + JavaScript (Dark Theme)            │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│                   FastAPI Backend                       │
-│          POST /scrape  GET /health  GET /export         │
-└───────┬──────────┬──────────┬──────────┬────────────────┘
-        │          │          │          │
-        ▼          ▼          ▼          ▼
-┌───────────┐ ┌─────────┐ ┌──────┐ ┌──────────┐
-│  Scraper  │ │Pipeline │ │ LLM  │ │Validation│
-│  Engine   │ │Processor│ │Helper│ │  Engine   │
-│           │ │         │ │      │ │           │
-│ • Static  │ │ • Clean │ │ • AI │ │ • Missing │
-│ • Dynamic │ │ • Dedup │ │  CSS │ │ • Dupes   │
-│ • Crawl   │ │ • Norm  │ │  Sel │ │ • Format  │
-└───────────┘ └────┬────┘ └──────┘ └──────────┘
-                   │
-                   ▼
-          ┌────────────────┐
-          │  Export Layer   │
-          │  CSV / JSON     │
-          └────────────────┘
+│                   Frontend Dashboard                     │
+│  Pipeline Visualizer · Batch Input · Validation Display  │
+├─────────────────────────────────────────────────────────┤
+│                    FastAPI Server                         │
+│  /api/scrape · /api/batch-scrape · /api/export · /docs   │
+├──────────┬───────────┬────────────┬──────────────────────┤
+│ Scraper  │ Pipeline  │ Validation │   LLM Assistant      │
+│ Manager  │ Processor │   Engine   │   (OpenRouter)       │
+├──────────┴───────────┴────────────┴──────────────────────┤
+│  Static Scraper (httpx)  │  Dynamic Scraper (Selenium)   │
+└──────────────────────────┴───────────────────────────────┘
 ```
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **Static Scraping** | BeautifulSoup + httpx for fast HTML extraction |
-| **Dynamic Scraping** | Selenium with headless Chrome for JS-rendered sites |
-| **Multi-page Crawling** | Follows links, handles pagination up to N pages |
-| **Data Processing** | Pandas-powered cleaning, dedup, and normalization |
-| **Validation Engine** | Automated quality checks with detailed reporting |
-| **AI Assistance** | LLM-powered pattern detection and data summarization |
-| **Structured Export** | Download results as CSV or JSON |
-| **REST API** | Full FastAPI backend with Swagger docs |
-| **Docker Support** | Production Dockerfile with Chromium included |
-| **Railway Ready** | One-click deployment to Railway |
+### Data Collection
+- **Static scraping** — httpx + BeautifulSoup for fast HTML parsing
+- **Dynamic scraping** — Selenium with headless Chrome for JS-rendered pages
+- **Batch processing** — scrape up to 20 URLs in a single pipeline run
+- **Retry logic** — configurable retries with exponential backoff
+- **Error categorization** — TIMEOUT, DNS, BLOCKED, NOT_FOUND, SSL, CONNECTION, PARSE
+
+### Data Processing Pipeline
+- Text cleaning & Unicode normalization
+- Duplicate detection and removal
+- Field normalization (URLs, empty values)
+- Table extraction and structured data parsing
+
+### Validation Engine
+- **Missing values** — per-column null/empty detection with severity levels
+- **Duplicate detection** — full-row and key-column duplicates
+- **Schema validation** — detects mixed types in columns (numeric/non-numeric, date/non-date)
+- **Format consistency** — catches inconsistent casing in categorical fields
+- **URL/Email format** — validates URL and email patterns
+- **Text quality** — flags very short or empty text fields
+- **Structured summary** — JSON report with valid/invalid counts and issue categories
+
+### AI Integration (via OpenRouter)
+- **Dataset summarization** — AI-generated description of extracted data
+- **Quality scoring** — 1-10 rating with justification, issues, and suggestions
+- **Text cleaning** — LLM-powered cleanup of messy text
+- **Data normalization** — AI standardization of formats and casing
+- **Pattern detection** — automatic CSS selector suggestions
+
+### Export
+- **CSV** — standard comma-separated values
+- **JSON** — pretty-printed JSON with full schema
+- **Google Sheets** — download CSV and open Google Sheets for import
 
 ---
 
 ## Quick Start
 
 ### Prerequisites
-
 - Python 3.11+
-- pip
+- Chrome/Chromium (for dynamic scraping)
 
-### Installation
-
+### Install & Run
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/mindrift.git
-cd mindrift
+# Clone
+git clone https://github.com/SaiNihal2622/ai-data-extraction-platform.git
+cd ai-data-extraction-platform
 
-# Create virtual environment
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS/Linux
-
-# Install dependencies
+# Install
 pip install -r requirements.txt
 
-# Configure environment
-copy .env.example .env
-# Edit .env and add your API keys (optional)
-```
+# Configure (optional — for AI features)
+cp .env.example .env
+# Edit .env with your OPENROUTER_API_KEY
 
-### Run Locally
-
-```bash
+# Run
 uvicorn app.main:app --reload --port 8000
 ```
 
-Open **http://localhost:8000** to access the dashboard.
-
-API docs available at **http://localhost:8000/docs**.
+Open `http://localhost:8000` to access the dashboard.
 
 ---
 
 ## API Reference
 
-### `GET /api/health`
-Returns service status and capabilities.
+| Endpoint | Method | Description |
+|----------|--------|------------|
+| `/api/health` | GET | System health check |
+| `/api/scrape` | POST | Single URL scrape with validation |
+| `/api/batch-scrape` | POST | Batch scrape multiple URLs |
+| `/api/export/{job_id}` | GET | Export dataset (CSV/JSON/Sheets) |
+| `/api/jobs` | GET | List all scrape jobs |
+| `/api/analyze` | POST | AI-powered HTML analysis |
 
-```json
-{
-  "status": "healthy",
-  "version": "1.0.0",
-  "llm_available": false,
-  "total_jobs": 0
-}
-```
-
-### `POST /api/scrape`
-Scrape a website and return extracted data.
-
-**Request:**
+### POST /api/scrape
 ```json
 {
   "url": "https://quotes.toscrape.com",
   "use_dynamic": false,
-  "use_llm": false,
+  "use_llm": true,
   "max_pages": 5
 }
 ```
 
-**Response:**
+### POST /api/batch-scrape
 ```json
 {
-  "job_id": "a1b2c3d4",
-  "url": "https://quotes.toscrape.com",
-  "method": "static",
-  "pages_crawled": 3,
-  "items_extracted": 30,
-  "data": [...],
-  "validation": {
-    "is_valid": true,
-    "total_issues": 2,
-    "issues": [...]
-  }
+  "urls": [
+    "https://quotes.toscrape.com",
+    "https://books.toscrape.com"
+  ],
+  "use_dynamic": false,
+  "use_llm": true,
+  "max_pages": 3
 }
 ```
 
-### `GET /api/export/{job_id}?format=csv|json`
-Download a previously scraped dataset.
+### Validation Summary Response
+```json
+{
+  "total_records": 1000,
+  "valid_records": 980,
+  "invalid_records": 20,
+  "issues": ["missing_fields", "duplicates", "format_errors"]
+}
+```
 
 ---
 
@@ -155,105 +139,63 @@ Download a previously scraped dataset.
 ```
 mindrift/
 ├── app/
-│   ├── main.py                 # FastAPI entry point
 │   ├── api/
-│   │   ├── models.py           # Pydantic request/response models
-│   │   └── routes.py           # API endpoint definitions
+│   │   ├── models.py          # Pydantic request/response models
+│   │   └── routes.py          # FastAPI endpoints
 │   ├── scraper/
-│   │   ├── static_scraper.py   # BeautifulSoup + httpx scraper
-│   │   ├── dynamic_scraper.py  # Selenium headless Chrome scraper
-│   │   └── scraper_manager.py  # Scrape orchestration & job mgmt
+│   │   ├── static_scraper.py  # httpx + BeautifulSoup
+│   │   ├── dynamic_scraper.py # Selenium headless Chrome
+│   │   └── scraper_manager.py # Orchestrator + batch + retry
 │   ├── pipeline/
-│   │   ├── processor.py        # Data cleaning & normalization
-│   │   └── exporter.py         # CSV/JSON export engine
+│   │   ├── processor.py       # Data cleaning & normalization
+│   │   └── exporter.py        # CSV/JSON export streams
 │   ├── validation/
-│   │   └── validator.py        # Data quality validation engine
+│   │   └── validator.py       # Schema + format + quality checks
 │   ├── llm/
-│   │   └── assistant.py        # LLM-assisted extraction helper
-│   └── frontend/
-│       ├── index.html          # Dashboard UI
-│       ├── style.css           # Dark theme styles
-│       └── app.js              # Frontend logic
-├── data/exports/               # Exported datasets
-├── requirements.txt
+│   │   └── assistant.py       # AI quality scoring + cleaning
+│   ├── frontend/
+│   │   ├── index.html         # Dashboard UI
+│   │   ├── style.css          # Dark theme + pipeline styling
+│   │   └── app.js             # Frontend logic
+│   └── main.py                # FastAPI app entry point
 ├── Dockerfile
 ├── railway.toml
+├── requirements.txt
 ├── .env.example
-├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Docker Deployment
+## Deployment
 
+### Docker
 ```bash
-# Build the image
 docker build -t mindrift .
-
-# Run the container
-docker run -p 8000:8000 \
-  -e OPENROUTER_API_KEY=your_key_here \
-  mindrift
+docker run -p 8000:8000 --env-file .env mindrift
 ```
 
-## Railway Deployment
-
-1. Push the repo to GitHub
-2. Connect the repo to [Railway](https://railway.app)
-3. Add environment variables (`OPENROUTER_API_KEY`, etc.)
-4. Deploy — Railway will use the Dockerfile automatically
+### Railway
+```bash
+npm install -g @railway/cli
+railway login
+railway init
+railway up --detach
+```
 
 ---
 
 ## Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `OPENROUTER_API_KEY` | No | — | OpenRouter API key for LLM features |
-| `GEMINI_API_KEY` | No | — | Google Gemini API key (alternative) |
-| `SELENIUM_HEADLESS` | No | `true` | Run Chrome headless |
-| `MAX_PAGES` | No | `10` | Default max crawl pages |
-| `PORT` | No | `8000` | Server port |
-
----
-
-## Example Usage
-
-### Scrape Quotes from a Website
-
-```bash
-curl -X POST http://localhost:8000/api/scrape \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://quotes.toscrape.com", "max_pages": 3}'
-```
-
-### Export as CSV
-
-```bash
-curl -o data.csv "http://localhost:8000/api/export/JOB_ID?format=csv"
-```
-
----
-
-## Limitations
-
-- Dynamic scraping requires Chromium (included in Docker image)
-- LLM features require an OpenRouter API key
-- In-memory job storage (resets on restart)
-- Rate limiting not implemented (use responsibly)
-
-## Future Improvements
-
-- Redis-backed job queue for persistence
-- Scheduled/recurring scrape jobs
-- Custom CSS selector input in the UI
-- Webhook notifications on completion
-- User authentication and rate limiting
-- FAISS-based vector search over extracted data
+| Variable | Required | Description |
+|----------|----------|------------|
+| `OPENROUTER_API_KEY` | Optional | OpenRouter API key for AI features |
+| `LLM_MODEL` | Optional | Model name (default: `google/gemini-2.0-flash-001`) |
+| `SELENIUM_HEADLESS` | Optional | Force headless mode (default: `true`) |
+| `PORT` | Auto | Set by Railway, defaults to 8000 |
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT

@@ -27,12 +27,13 @@ logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
-    title="AI Data Extraction Platform",
+    title="AI Data Production & Validation Platform",
     description=(
-        "A production-ready web scraping and data extraction platform "
-        "with AI-assisted automation, data validation, and structured exports."
+        "Production-grade platform for generating structured, validated datasets "
+        "for AI training pipelines. Features batch scraping, schema validation, "
+        "retry logic, AI-assisted quality scoring, and multi-format export."
     ),
-    version="1.0.0",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
@@ -63,7 +64,7 @@ async def serve_frontend():
     if os.path.exists(index_path):
         return FileResponse(index_path)
     return {
-        "message": "AI Data Extraction Platform",
+        "message": "AI Data Production & Validation Platform",
         "docs": "/docs",
         "health": "/api/health",
     }
@@ -74,7 +75,7 @@ async def startup_event():
     """Application startup tasks."""
     # Ensure data directories exist
     os.makedirs("data/exports", exist_ok=True)
-    logger.info("🚀 AI Data Extraction Platform started")
+    logger.info("🚀 AI Data Production & Validation Platform started")
     logger.info(f"   Frontend: {FRONTEND_DIR}")
     logger.info(f"   Docs: http://localhost:8000/docs")
 
@@ -82,4 +83,4 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     """Application shutdown cleanup."""
-    logger.info("Shutting down AI Data Extraction Platform")
+    logger.info("Shutting down AI Data Production & Validation Platform")

@@ -1,8 +1,9 @@
 """
-LLM-Assisted Extraction Module
---------------------------------
-Uses OpenRouter or Gemini API to assist with data extraction tasks:
-pattern detection, selector suggestion, data summarization, and validation.
+LLM-Assisted Data Production Module
+--------------------------------------
+Uses OpenRouter API to assist with AI training data quality:
+pattern detection, text cleaning, data normalization,
+quality scoring, and dataset summarization.
 """
 
 import os
@@ -19,10 +20,9 @@ logger = logging.getLogger(__name__)
 
 class LLMAssistant:
     """
-    AI-powered assistant for data extraction tasks.
+    AI-powered assistant for data production workflows.
 
-    Connects to OpenRouter API (OpenAI-compatible) or falls back gracefully
-    when no API key is configured.
+    Connects to OpenRouter API (OpenAI-compatible) or falls back gracefully.
     """
 
     def __init__(self):
@@ -32,11 +32,9 @@ class LLMAssistant:
 
     @property
     def is_available(self) -> bool:
-        """Check if LLM service is configured and available."""
         return bool(self.api_key and self.api_key != "your_openrouter_api_key_here")
 
     def _get_client(self):
-        """Get or create the OpenAI-compatible client for OpenRouter."""
         if self._client is None:
             try:
                 from openai import OpenAI
@@ -50,16 +48,6 @@ class LLMAssistant:
         return self._client
 
     def _call_llm(self, system_prompt: str, user_prompt: str) -> Optional[str]:
-        """
-        Make a call to the LLM API.
-
-        Args:
-            system_prompt: System instruction for the model.
-            user_prompt: User message to send.
-
-        Returns:
-            Model response text, or None if unavailable.
-        """
         if not self.is_available:
             logger.info("LLM not configured — skipping AI assistance")
             return None
@@ -83,16 +71,24 @@ class LLMAssistant:
             logger.error(f"LLM API call failed: {e}")
             return None
 
+    def _parse_json_response(self, result: str) -> Optional[dict | list]:
+        """Extract JSON from LLM response, handling markdown code blocks."""
+        if not result:
+            return None
+        try:
+            text = result
+            if "```json" in text:
+                text = text.split("```json")[1].split("```")[0]
+            elif "```" in text:
+                text = text.split("```")[1].split("```")[0]
+            return json.loads(text)
+        except (json.JSONDecodeError, IndexError):
+            return None
+
+    # ── Core Features ────────────────────────────────────
+
     def detect_patterns(self, html_snippet: str) -> Optional[dict]:
-        """
-        Analyze HTML to detect repeating data patterns.
-
-        Args:
-            html_snippet: A sample of the HTML content (first 3000 chars).
-
-        Returns:
-            Dictionary with detected patterns and suggested selectors.
-        """
+        """Analyze HTML to detect repeating data patterns."""
         system = (
             "You are an expert web scraping engineer. Analyze the given HTML "
             "and identify repeating data patterns (lists, cards, tables, etc.). "
@@ -102,32 +98,12 @@ class LLMAssistant:
             "'recommended_approach' (scraping strategy)."
         )
         user = f"Analyze this HTML for data patterns:\n\n```html\n{html_snippet[:3000]}\n```"
-
         result = self._call_llm(system, user)
-        if result:
-            try:
-                # Try to extract JSON from the response
-                json_match = result
-                if "```json" in result:
-                    json_match = result.split("```json")[1].split("```")[0]
-                elif "```" in result:
-                    json_match = result.split("```")[1].split("```")[0]
-                return json.loads(json_match)
-            except (json.JSONDecodeError, IndexError):
-                return {"raw_analysis": result}
-        return None
+        parsed = self._parse_json_response(result)
+        return parsed if parsed else ({"raw_analysis": result} if result else None)
 
     def suggest_selectors(self, html_snippet: str, data_description: str) -> Optional[list[dict]]:
-        """
-        Suggest CSS selectors for extracting specific data.
-
-        Args:
-            html_snippet: Sample HTML content.
-            data_description: Natural language description of desired data.
-
-        Returns:
-            List of selector suggestions.
-        """
+        """Suggest CSS selectors for extracting specific data."""
         system = (
             "You are an expert at CSS selectors and web scraping. "
             "Given HTML and a description of what data to extract, "
@@ -138,50 +114,126 @@ class LLMAssistant:
             f"I want to extract: {data_description}\n\n"
             f"From this HTML:\n```html\n{html_snippet[:3000]}\n```"
         )
-
         result = self._call_llm(system, user)
-        if result:
-            try:
-                json_match = result
-                if "```json" in result:
-                    json_match = result.split("```json")[1].split("```")[0]
-                elif "```" in result:
-                    json_match = result.split("```")[1].split("```")[0]
-                return json.loads(json_match)
-            except (json.JSONDecodeError, IndexError):
-                return [{"raw_suggestion": result}]
-        return None
+        parsed = self._parse_json_response(result)
+        return parsed if isinstance(parsed, list) else ([{"raw_suggestion": result}] if result else None)
 
     def summarize_data(self, data_sample: list[dict]) -> Optional[str]:
-        """
-        Generate a human-readable summary of extracted data.
-
-        Args:
-            data_sample: First 10 records of the dataset.
-
-        Returns:
-            Natural language summary string.
-        """
+        """Generate a human-readable summary of extracted data."""
         system = (
-            "You are a data analyst. Summarize the given dataset sample. "
-            "Describe: what the data contains, key fields, data quality, "
-            "and any notable patterns. Keep it concise (3-5 sentences)."
+            "You are a data analyst specializing in AI training datasets. "
+            "Summarize the given dataset sample. Describe: what the data contains, "
+            "key fields, data quality, patterns, and suitability for AI training. "
+            "Keep it concise (3-5 sentences)."
         )
         user = f"Dataset sample (first records):\n\n{json.dumps(data_sample[:10], indent=2, default=str)}"
-
         return self._call_llm(system, user)
 
-    def validate_with_ai(self, data_sample: list[dict], expected_schema: str = "") -> Optional[dict]:
+    # ── New AI Data Production Features ──────────────────
+
+    def clean_text_batch(self, records: list[dict], text_fields: list[str] | None = None) -> list[dict]:
         """
-        Use AI to validate data quality and suggest improvements.
+        Use LLM to clean and normalize messy text in extracted records.
 
         Args:
-            data_sample: Sample records to validate.
-            expected_schema: Optional expected schema description.
+            records: List of data records.
+            text_fields: Specific text fields to clean (auto-detects if None).
 
         Returns:
-            Validation results and suggestions.
+            Cleaned records.
         """
+        if not records or not self.is_available:
+            return records
+
+        # Auto-detect text fields
+        if not text_fields:
+            text_fields = [k for k in records[0].keys()
+                          if isinstance(records[0].get(k), str)
+                          and k.lower() in ("title", "name", "description", "content", "text", "summary")]
+
+        if not text_fields:
+            return records
+
+        # Process in batches of 5 for API efficiency
+        sample = records[:5]
+        system = (
+            "You are a data cleaning specialist. Clean the following text fields "
+            "by removing HTML artifacts, fixing encoding issues, normalizing whitespace, "
+            "fixing truncated sentences, and ensuring readable text. "
+            "Return the cleaned records as a JSON array with the same structure."
+        )
+        user = (
+            f"Clean these text fields {text_fields} in these records:\n\n"
+            f"{json.dumps(sample, indent=2, default=str)}"
+        )
+
+        result = self._call_llm(system, user)
+        parsed = self._parse_json_response(result)
+
+        if isinstance(parsed, list) and len(parsed) == len(sample):
+            # Apply cleaned values back
+            for i, cleaned in enumerate(parsed):
+                if i < len(records):
+                    for field in text_fields:
+                        if field in cleaned:
+                            records[i][field] = cleaned[field]
+
+        return records
+
+    def normalize_data(self, records: list[dict]) -> list[dict]:
+        """
+        Use AI to normalize inconsistent field values.
+
+        Fixes: mixed date formats, inconsistent casing,
+        varying units, abbreviation expansion.
+        """
+        if not records or not self.is_available:
+            return records
+
+        sample = records[:5]
+        system = (
+            "You are a data normalization specialist. Normalize these records by: "
+            "1) Standardizing date formats to ISO 8601, 2) Fixing inconsistent casing, "
+            "3) Expanding abbreviations, 4) Standardizing number formats. "
+            "Return as a JSON array with the same keys."
+        )
+        user = f"Normalize these records:\n\n{json.dumps(sample, indent=2, default=str)}"
+
+        result = self._call_llm(system, user)
+        parsed = self._parse_json_response(result)
+
+        if isinstance(parsed, list) and len(parsed) == len(sample):
+            for i, normalized in enumerate(parsed):
+                if i < len(records):
+                    records[i].update(normalized)
+
+        return records
+
+    def quality_score(self, data_sample: list[dict]) -> Optional[dict]:
+        """
+        Return a data quality score (1-10) with justification.
+
+        Returns:
+            {"score": 8, "justification": "...", "issues": [...], "suggestions": [...]}
+        """
+        if not self.is_available:
+            return None
+
+        system = (
+            "You are a data quality engineer evaluating datasets for AI training. "
+            "Rate this dataset from 1-10 for AI training suitability. Consider: "
+            "completeness, consistency, accuracy indicators, and structural quality. "
+            "Return JSON: {score: number, justification: string, "
+            "issues: [string], suggestions: [string]}"
+        )
+        user = f"Rate this dataset for AI training:\n\n{json.dumps(data_sample[:10], indent=2, default=str)}"
+
+        result = self._call_llm(system, user)
+        parsed = self._parse_json_response(result)
+        return parsed if isinstance(parsed, dict) else ({"raw_validation": result} if result else None)
+
+    def validate_with_ai(self, data_sample: list[dict], expected_schema: str = "") -> Optional[dict]:
+        """Use AI to validate data quality and suggest improvements."""
         system = (
             "You are a data quality engineer. Review the dataset and identify: "
             "1) Data quality issues, 2) Missing information, "
@@ -192,14 +244,5 @@ class LLMAssistant:
         user = f"Review this dataset:{schema_note}\n\n{json.dumps(data_sample[:10], indent=2, default=str)}"
 
         result = self._call_llm(system, user)
-        if result:
-            try:
-                json_match = result
-                if "```json" in result:
-                    json_match = result.split("```json")[1].split("```")[0]
-                elif "```" in result:
-                    json_match = result.split("```")[1].split("```")[0]
-                return json.loads(json_match)
-            except (json.JSONDecodeError, IndexError):
-                return {"raw_validation": result}
-        return None
+        parsed = self._parse_json_response(result)
+        return parsed if isinstance(parsed, dict) else ({"raw_validation": result} if result else None)

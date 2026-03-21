@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="AI-powered web scraping and data extraction platform with automated validation and structured exports.">
-    <title>MindRift — AI Data Extraction Platform</title>
+    <meta name="description" content="Production-grade AI data production and validation platform for generating structured datasets for AI training pipelines.">
+    <title>Mindrift — AI Data Production & Validation Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -50,15 +50,46 @@
         <section class="hero">
             <h1 class="hero-title">
                 AI Data<br>
-                <span class="gradient-text">Extraction Platform</span>
+                <span class="gradient-text">Production & Validation</span>
             </h1>
             <p class="hero-subtitle">
-                Extract structured data from any website with intelligent scraping,
-                automated validation, and AI-assisted analysis.
+                Generate structured, validated datasets for AI training pipelines.
+                Production-grade scraping, automated validation, and AI-assisted data quality.
             </p>
         </section>
 
-        <!-- Scrape Input Card -->
+        <!-- Pipeline Step Visualizer -->
+        <section class="pipeline-steps" id="pipelineSteps">
+            <div class="pipeline-step" data-step="collect">
+                <div class="step-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 10l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <span class="step-label">Collect</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="pipeline-step" data-step="process">
+                <div class="step-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 10h6M10 7v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <span class="step-label">Process</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="pipeline-step" data-step="validate">
+                <div class="step-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 18a8 8 0 100-16 8 8 0 000 16z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <span class="step-label">Validate</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="pipeline-step" data-step="export">
+                <div class="step-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 3v10M6 9l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M3 14v3h14v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+                <span class="step-label">Export</span>
+            </div>
+        </section>
+
+        <!-- Input Card -->
         <section class="card input-card" id="inputCard">
             <div class="card-header">
                 <h2 class="card-title">
@@ -66,11 +97,18 @@
                         <path d="M10 2C5.58 2 2 5.58 2 10s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14.4A6.4 6.4 0 1110 3.6 6.4 6.4 0 0110 16.4z" fill="currentColor" opacity="0.3"/>
                         <path d="M10 5v5l3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                     </svg>
-                    New Extraction
+                    New Data Production Job
                 </h2>
+                <!-- Batch Mode Toggle -->
+                <label class="toggle-label batch-toggle">
+                    <input type="checkbox" id="batchToggle" class="toggle-input">
+                    <span class="toggle-switch"></span>
+                    <span class="toggle-text">Batch Mode</span>
+                </label>
             </div>
             <div class="card-body">
-                <div class="input-group">
+                <!-- Single URL Input -->
+                <div class="input-group" id="singleUrlGroup">
                     <label for="urlInput" class="input-label">Target URL</label>
                     <div class="url-input-wrap">
                         <svg class="url-icon" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -81,12 +119,18 @@
                     </div>
                 </div>
 
+                <!-- Batch URL Input -->
+                <div class="input-group" id="batchUrlGroup" style="display:none;">
+                    <label for="batchUrls" class="input-label">Target URLs <span class="input-hint">(one per line, max 20)</span></label>
+                    <textarea id="batchUrls" class="batch-textarea" placeholder="https://quotes.toscrape.com&#10;https://books.toscrape.com&#10;https://example.com" rows="5"></textarea>
+                </div>
+
                 <div class="options-row">
                     <div class="option-group">
                         <label class="toggle-label">
                             <input type="checkbox" id="dynamicToggle" class="toggle-input">
                             <span class="toggle-switch"></span>
-                            <span class="toggle-text">Dynamic (JS) Scraping</span>
+                            <span class="toggle-text">Dynamic (JS)</span>
                         </label>
                     </div>
                     <div class="option-group">
@@ -102,12 +146,12 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary" id="scrapeBtn" onclick="startScrape()">
+                <button class="btn btn-primary" id="scrapeBtn" onclick="startPipeline()">
                     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                         <path d="M15.75 9a6.75 6.75 0 11-13.5 0 6.75 6.75 0 0113.5 0z" stroke="currentColor" stroke-width="1.5"/>
                         <path d="M9 5.25v3.75l2.25 2.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                     </svg>
-                    <span>Start Extraction</span>
+                    <span>Start Data Production</span>
                 </button>
             </div>
         </section>
@@ -116,10 +160,14 @@
         <section class="card loading-card" id="loadingCard" style="display:none;">
             <div class="loading-content">
                 <div class="spinner"></div>
-                <h3 class="loading-title">Extracting Data...</h3>
+                <h3 class="loading-title">Running Pipeline...</h3>
                 <p class="loading-text" id="loadingText">Connecting to target website</p>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <!-- Batch Progress -->
+                <div class="batch-progress" id="batchProgress" style="display:none;">
+                    <div class="batch-progress-text" id="batchProgressText">Processing URL 1 of 3...</div>
                 </div>
             </div>
         </section>
@@ -131,7 +179,7 @@
                     <circle cx="24" cy="24" r="20" stroke="#FF6B6B" stroke-width="2" opacity="0.3"/>
                     <path d="M24 16v8M24 28v2" stroke="#FF6B6B" stroke-width="2.5" stroke-linecap="round"/>
                 </svg>
-                <h3 class="error-title">Extraction Failed</h3>
+                <h3 class="error-title">Pipeline Failed</h3>
                 <p class="error-text" id="errorText"></p>
                 <button class="btn btn-outline" onclick="resetUI()">Try Again</button>
             </div>
@@ -149,17 +197,30 @@
                     <span class="stat-value" id="statItems">0</span>
                     <span class="stat-label">Items Extracted</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-value" id="statMethod">—</span>
-                    <span class="stat-label">Method</span>
+                <div class="stat-card stat-card-valid">
+                    <span class="stat-value" id="statValid">0</span>
+                    <span class="stat-label">Valid Records</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-value" id="statIssues">0</span>
-                    <span class="stat-label">Validation Issues</span>
+                <div class="stat-card stat-card-invalid">
+                    <span class="stat-value" id="statInvalid">0</span>
+                    <span class="stat-label">Invalid Records</span>
                 </div>
             </div>
 
-            <!-- AI Summary (if LLM was used) -->
+            <!-- Batch URL Results -->
+            <div class="card" id="batchResultsCard" style="display:none;">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="3" rx="1" fill="currentColor" opacity="0.3"/><rect x="2" y="9" width="16" height="3" rx="1" fill="currentColor" opacity="0.2"/><rect x="2" y="14" width="16" height="3" rx="1" fill="currentColor" opacity="0.1"/></svg>
+                        Batch URL Results
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="batch-url-list" id="batchUrlList"></div>
+                </div>
+            </div>
+
+            <!-- AI Summary -->
             <div class="card" id="aiSummaryCard" style="display:none;">
                 <div class="card-header">
                     <h2 class="card-title">
@@ -168,9 +229,11 @@
                         </svg>
                         AI Analysis
                     </h2>
+                    <span class="quality-badge" id="qualityBadge" style="display:none;">— / 10</span>
                 </div>
                 <div class="card-body">
                     <p class="ai-summary-text" id="aiSummaryText"></p>
+                    <div class="ai-quality-details" id="aiQualityDetails" style="display:none;"></div>
                 </div>
             </div>
 
@@ -183,7 +246,7 @@
                             <line x1="2" y1="7" x2="18" y2="7" stroke="currentColor" stroke-width="1.5"/>
                             <line x1="7" y1="7" x2="7" y2="17" stroke="currentColor" stroke-width="1.5"/>
                         </svg>
-                        Extracted Data
+                        Extracted Dataset
                     </h2>
                     <div class="card-actions">
                         <button class="btn btn-sm btn-accent" id="exportCsvBtn" onclick="exportData('csv')">
@@ -191,6 +254,9 @@
                         </button>
                         <button class="btn btn-sm btn-accent" id="exportJsonBtn" onclick="exportData('json')">
                             ⬇ JSON
+                        </button>
+                        <button class="btn btn-sm btn-sheets" id="exportSheetsBtn" onclick="exportToSheets()">
+                            📊 Google Sheets
                         </button>
                     </div>
                 </div>
@@ -216,6 +282,11 @@
                     <span class="validation-badge" id="validationBadge">—</span>
                 </div>
                 <div class="card-body">
+                    <!-- Validation Summary Bar -->
+                    <div class="validation-summary-bar" id="validationSummaryBar">
+                        <div class="summary-bar-fill valid" id="validBar"></div>
+                        <div class="summary-bar-fill invalid" id="invalidBar"></div>
+                    </div>
                     <div class="validation-stats" id="validationStats"></div>
                     <div class="issues-list" id="issuesList"></div>
                 </div>
@@ -225,7 +296,7 @@
 
     <!-- Footer -->
     <footer class="footer">
-        <p>Mindrift — AI Data Extraction Platform &middot; Built for the AI Pilot Vibe Code Specialist role</p>
+        <p>Mindrift — AI Data Production & Validation Platform · Structured datasets for AI training pipelines</p>
     </footer>
 
     <script src="/static/app.js"></script>
