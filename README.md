@@ -2,7 +2,7 @@
 
 A production-grade platform for generating structured, validated datasets for AI training pipelines. Built with Python, FastAPI, and AI-assisted quality scoring — inspired by Toloka and Mindrift data production workflows.
 
-> **Live Demo:** [Deployed on Railway](https://genuine-elegance-production-b502.up.railway.app)
+> **Live Demo:** [Deployed on Railway](https://stunning-friendship-production-94b6.up.railway.app)
 
 ---
 
